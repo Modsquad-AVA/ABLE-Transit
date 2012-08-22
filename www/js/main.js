@@ -1,23 +1,3 @@
-/*
-
-Directions in stop names: 
-C = Continue 
-L = Left 
-R = Right 
-EB = Eastbound 
-WB = Westbound 
-NB = Northbound 
-SB = Southbound 
-NS = Nearside (Before the intersection) 
-FS = Farside (After the intersection) 
-NM = Nearside midblock 
-FM = Farside midblock 
-OP = Opposite 
-AT = At 
-IB = Inbound 
-OB = Outbound
-*/
-
 // GLOBAL VARIABLES
 
 /* The database object */
@@ -57,6 +37,8 @@ function update_page(){
     document.getElementById("main").style.display="none";
     document.getElementById("sched").style.display="block";
     document.getElementById("select_stop").style.display="none";
+    document.getElementById("app_info").style.display="none";
+
     change = 0;
     get_loc();
 }
@@ -75,7 +57,10 @@ function stop_list(){
     document.getElementById("main").style.display="none";
     document.getElementById("sched").style.display="none";
     document.getElementById("select_stop").style.display="block";
+    document.getElementById("app_info").style.display="none";
     change = 1;
+    info_buttonHandler();
+
     get_loc();
 }
 
@@ -93,7 +78,6 @@ function get_loc(){
  * @param {position object} position The values retuned from the GeoLocation API
  */
 function onSuccess(position) {
-    
     lat = position.coords.latitude;
     lon = position.coords.longitude;
     closest_stop();
@@ -183,6 +167,32 @@ function find_closest(stop){
         }
     }
 }
+
+/**
+ * Event handler for app info button click
+*/ 
+function info_buttonHandler(){
+    var infoButtonElement = document.getElementById("stop_info");
+    infoButtonElement.id = "stop_info";
+    var infoButton = infoButtonElement;
+    infoButton.addEventListener("click", display_info, false);
+}
+
+/**
+ * Displays the bus name information 
+*/
+function display_info(){
+    document.getElementById("main").style.display="none";
+    document.getElementById("sched").style.display="none";
+    document.getElementById("select_stop").style.display="none";
+    document.getElementById("app_info").style.display="block";
+    
+    var returnButtonElement = document.getElementById("return_stops");
+    returnButtonElement.id = "return_stops";
+    var returnButton = returnButtonElement;
+    returnButton.addEventListener("click", stop_list, false);
+}
+
 /**
  * Displays the list of closest stops using http://ukijs.org
     calls update_name to display the schedule information for the new stop
@@ -194,7 +204,7 @@ function display_stops(stop){
         data[j] = stop[j][3];
     }
 
-    var p = uki({ 
+    uki({ 
         view: 'HSplitPane', rect: '1000 900', anchors: 'top left right bottom', handleWidth: 1,
             leftMin: 200, rightMin: 400, handlePosition: 200,
             leftChildViews: [ // scrollable list on the left
@@ -214,7 +224,7 @@ function display_stops(stop){
         }
 
     ).attachTo( document.getElementById('stops'), '1000 600' )
-    
+    info_buttonHandler();
     var index;
     uki('List').click(function() {
         index = this.selectedIndex();
@@ -226,6 +236,7 @@ function display_stops(stop){
         document.getElementById("main").style.display="none";
         document.getElementById("sched").style.display="block";
         document.getElementById("select_stop").style.display="none";
+        document.getElementById("app_info").style.display="none";
         bus_stop = stop[0][2];
         update_name(stop[0][3]);
 

@@ -31,7 +31,7 @@
             <button id="loc_button" type="html">Schedule info</button> 
         </div>
         <div id="sched" style="display:none">
-            <p id="stop_info"> Schedule information for stop 
+            <p id="schedule_info"> Schedule information for stop 
                 <span id="stop_name"> </span>
             </p>  
             <button id="refresh" type="html">Refresh</button> 
@@ -45,11 +45,65 @@
             <p id="select_info"> Select the stop you would like 
             </p>  
             <button id="refresh_stop" type="html">Refresh</button> 
-            <button id="app_info" type="html">App Info</button> 
+            <button id="stop_info" type="html">App Info</button> 
 
             <div id='stops' style='width: 100%; height: 400px;'></div>
 
-        </div>  
+        </div>
+        <div id = "app_info" style="display:none">
+            <button id="return_stops" type="html">Back</button> 
+            <h1>
+                Directions in stop names: 
+            </h1>
+            <table border="1">
+            <tr>
+                <td>C </td>
+                <td>Continue </td>
+            </tr>
+            <tr>
+                <td>L </td>
+                <td>Left </td>
+            </tr>
+            <tr>
+                <td>R </td>
+                <td>Right </td>
+            </tr>
+            <tr>
+                <td>EB</td><td>Eastbound</td>
+            </tr>
+            <tr>
+                <td>WB</td><td>Westbound</td>
+            </tr>
+            <tr>
+                <td>NB</td><td>Northbound</td>
+            </tr>
+            <tr>
+                <td>SB</td><td>Southbound</td>
+            </tr>
+            <tr>
+                <td>NS</td><td>Nearside (Before the intersection)</td>
+            </tr>
+            <tr>
+                <td>FS</td><td>Farside (After the intersection)</td>
+            </tr>
+            <tr>
+                <td>NM</td><td>Nearside midblock</td>
+            </tr>
+            <tr>
+                <td>FM</td><td>Farside midblock</td>
+            </tr>
+            <tr>
+                <td>OP</td><td>Opposite</td>
+            </tr>
+            <tr>
+                <td>IB</td><td>Inbound</td>
+            </tr>
+            <tr>
+                <td>OB</td><td>Outbound</td>
+            </tr>
+              
+            </table>
+        </div>
     </body> 
             
 </html>
