@@ -1,0 +1,3 @@
+I am making a bus stop app using HTML5. cx
+
+departure_times use 24-hour clock and go above 24 (ex, 1:04:00 AM = 25:04:00)

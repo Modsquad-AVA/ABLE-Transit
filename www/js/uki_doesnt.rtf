@@ -1,0 +1,732 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1138\cocoasubrtf470
+{\fonttbl\f0\fnil\fcharset0 Menlo-Regular;}
+{\colortbl;\red255\green255\blue255;\red0\green116\blue0;\red170\green13\blue145;\red28\green0\blue207;
+\red196\green26\blue22;}
+\margl1440\margr1440\vieww10800\viewh8400\viewkind0
+\deftab560
+\pard\tx560\pardeftab560\pardirnatural
+
+\f0\fs22 \cf0 \CocoaLigature0 \
+\cf2 // Cordova is ready\cf0 \
+\cf2 //\cf0 \
+\
+\cf3 var\cf0  db;\
+\cf3 var\cf0  lat = \cf4 48.42446409\cf0 ;\
+\cf3 var\cf0  lon = -\cf4 123.3645784\cf0 ;\
+\
+\cf3 function\cf0  onDeviceReady() \{\
+    loadDB();\
+\}\
+\
+\cf3 function\cf0  loadDB()\{\
+    db = window.sqlitePlugin.openDatabase(\cf5 "transit.db"\cf0 , \cf5 "1.0"\cf0 , \cf5 "PhoneGap Demo"\cf0 , \cf4 2000000\cf0 );\
+    \
+    db.transaction(\cf3 function\cf0 (tx) \{\
+    \
+        tx.executeSql(\cf4 'DROP TABLE IF Exists agency'\cf0 );\
+        tx.executeSql(\cf4 'CREATE TABLE IF NOT EXISTS agency (agency_id text PRIMARY KEY, agency_name text,agency_url text, agency_timezone text, agency_lang text)'\cf0 );\
+        tx.executeSql(\cf4 'DROP TABLE IF Exists calendar_dates'\cf0 );\
+        tx.executeSql(\cf4 'CREATE TABLE IF NOT EXISTS calendar_dates(service_id text, date text,exception_type text)'\cf0 );\
+        tx.executeSql(\cf4 'DROP TABLE IF Exists calendar'\cf0 );\
+        tx.executeSql(\cf4 'CREATE TABLE IF NOT EXISTS calendar(service_id text PRIMARY KEY, monday text,tuesday text, wednesday text, thursday text, friday text, saturday text, sunday text, start_date text,end_date text)'\cf0 );\
+        tx.executeSql(\cf4 'DROP TABLE IF Exists routes'\cf0 );\
+        tx.executeSql(\cf4 'CREATE TABLE IF NOT EXISTS routes (route_id text PRIMARY KEY,route_short_name text,route_long_name text, route_desc text,route_type text)'\cf0 );\
+        tx.executeSql(\cf4 'DROP TABLE IF Exists stop_times'\cf0 );\
+        tx.executeSql(\cf4 'CREATE TABLE IF NOT EXISTS stop_times (trip_id text, arrival_time text,departure_time text, stop_id text, stop_sequence text, pickup_type text, drop_off_type text)'\cf0 );\
+        tx.executeSql(\cf4 'DROP TABLE IF Exists stop_id'\cf0 );\
+        tx.executeSql(\cf4 'CREATE TABLE IF NOT EXISTS stops (stop_id text PRIMARY KEY, stop_name text, stop_desc text, stop_lat text, stop_lon text, zone_id text)'\cf0 );\
+        tx.executeSql(\cf4 'DROP TABLE IF Exists trips'\cf0 );\
+        tx.executeSql(\cf4 'CREATE TABLE IF NOT EXISTS trips (route_id text, service_id text, trip_id text PRIMARY KEY, block_id text, trip_headsign text)'\cf0 );\
+        console.log(\cf5 "All 7 tables created"\cf0 );\
+        \
+    \});\
+    console.log(\cf5 "hello "\cf0 );\
+   \cf2 // addData();\cf0 \
+   uki(\{\
+      view: \cf5 "Button"\cf0 , text: \cf5 "Update Schedule"\cf0 ,\
+      rect: \cf5 "120 80 180 24"\cf0 \
+    \}).attachTo( document.getElementById(\cf5 "test"\cf0 ) );\
+     \
+    uki(\cf5 "Button[text^=Update]"\cf0 ).click(\
+   \cf2 //   function() \{ download_file(); \}\cf0 \
+      \cf3 function\cf0 () \{ addData(); \}\
+    );\
+   \
+\}\
+\
+\cf3 function\cf0  download_file()\{\
+    \cf2 // do your thing!\cf0 \
+    fileDownloadMgr.downloadFile(\cf5 "http://bct2.baremetal.com:8080/GoogleTransit/BCTransit/google_transit.zip"\cf0 ,\cf5 "GTFS.zip"\cf0 );\
+    \cf2 //url :refers to the file url\cf0 \
+    \cf2 //filepath : path for downloaded file (be sure to put /www/your downloadfolder name/filename)\cf0 \
+\}\
+\
+\cf3 var\cf0  xsltp = \cf3 new\cf0  XSLTProcessor();\
+    xsltp.importStylesheet(xsl);\
+    \cf3 var\cf0  documentFragment = xsltp.transformToFragment(xml,document);\
+    \cf2 //content = documentFragment; // hang!!\cf0 \
+    content = documentFragment.firstChild.innerHTML;\
+    \cf2 //content = documentFragment.firstChild.textContent;\cf0 \
+\
+\}\
+\
+\
+\cf3 function\cf0  addData()\{\
+\
+    load_data(db);\
+\cf2 /*    db.transaction(function(tx)\{\
+       // STOPS\
+        var stop660 = ['100671', 'Bay 1 at Tillicum Mall (Stop ID: 100671)', '', '48.45426155', '-123.3963297', ''];\
+        tx.executeSql('INSERT INTO stops VALUES (?,?,?,?,?,?)', stop660);\
+        var stop819 = ['100832', 'westbound Cowper NS Admirals (Stop ID: 100832)', '', '48.45632348', '-123.4132127', ''];\
+        tx.executeSql('INSERT INTO stops VALUES (?,?,?,?,?,?)', stop819);\
+        var stop32 = ['100033', 'eastbound Fort FS Douglas (Stop ID: 100033)', '', '48.42446409', '-123.3645784', ''];\
+        tx.executeSql('INSERT INTO stops VALUES (?,?,?,?,?,?)', stop32);\
+        var stop1045 = ['101076', 'Bay 1 at UVIC Exchange (Stop ID: 101076)', '', '48.46597267', '-123.3095174', ''];\
+        tx.executeSql('INSERT INTO stops VALUES (?,?,?,?,?,?)', stop1045);\
+        var stop1087 = ['101119', 'westbound Hospital Way NS Parking Entrance at Victoria General Hospital (Stop ID: 101119)', '', '48.46622389', '-123.4350071', ''];\
+        tx.executeSql('INSERT INTO stops VALUES (?,?,?,?,?,?)', stop1087);\
+        var stop212 = ['100215', 'eastbound Skinner FS Catherine (Stop ID: 100215)', '', '48.43551054', '-123.3844094', ''];\
+        tx.executeSql('INSERT INTO stops VALUES (?,?,?,?,?,?)', stop212);\
+        var stop2252 = ['102417', 'Bay 3 at UVIC Exchange (Stop ID: 102417)', '', '48.46626733', '-123.3091658', ''];\
+        tx.executeSql('INSERT INTO stops VALUES (?,?,?,?,?,?)', stop2252);\
+        var stop182 = ['100185', 'westbound Bay FS Douglas (Stop ID: 100185)', '', '48.43579771', '-123.3659807', ''];\
+        tx.executeSql('INSERT INTO stops VALUES (?,?,?,?,?,?)', stop182);\
+        var stop687 = ['100698', 'westbound Lyall FS Moresby at dockyard (Stop ID: 100698)', '', '48.42763605', '-123.4281392', ''];\
+        tx.executeSql('INSERT INTO stops VALUES (?,?,?,?,?,?)', stop687);\
+        var stop84 = ['100085', 'northbound Quadra NS Johnson (Stop ID: 100085)', '', '48.42614427', '-123.3590611', ''];\
+        tx.executeSql('INSERT INTO stops VALUES (?,?,?,?,?,?)', stop84);\
+        var stop1393 = ['101430', 'Bay B at Royal Oak Exchange (Stop ID: 101430)', '', '48.49850029', '-123.3887259', ''];\
+        tx.executeSql('INSERT INTO stops VALUES (?,?,?,?,?,?)', stop1393);\
+        var stop1377 = ['101414', 'Bay C at Royal Oak Exchange (Stop ID: 101414)', '', '48.49900811', '-123.3889074', ''];\
+        tx.executeSql('INSERT INTO stops VALUES (?,?,?,?,?,?)', stop1377);\
+        var stop2907 = ['103240', 'westbound Hwy 33 W NS Kneller (Stop ID: 103240)', '', '49.88911268', '-119.4100145', ''];\
+        tx.executeSql('INSERT INTO stops VALUES (?,?,?,?,?,?)', stop2907);\
+        var stop687 = ['100698', 'westbound Lyall FS Moresby at dockyard (Stop ID: 100698)', '', '48.42763605', '-123.4281392', ''];\
+        tx.executeSql('INSERT INTO stops VALUES (?,?,?,?,?,?)', stop687);\
+                       \
+        console.log("Insert into stops");\
+    \}, function(e) \{\
+        console.log("ERROR: " + e.message);\
+    \});\
+*/\cf0 \
+    db.transaction(\cf3 function\cf0 (tx)\{\
+       \cf2 // STOP_TIMES\cf0 \
+        \cf3 var\cf0  stop_times120875 = [\cf4 '2441085'\cf0 , \cf4 '7:38:00'\cf0 , \cf4 '7:38:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '36'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times120875);\
+        \cf3 var\cf0  stop_times121396 = [\cf4 '2419003'\cf0 , \cf4 '13:12:00'\cf0 , \cf4 '13:12:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '19'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times121396);\
+        \cf3 var\cf0  stop_times121449 = [\cf4 '2419002'\cf0 , \cf4 '12:42:00'\cf0 , \cf4 '12:42:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '19'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times121449);    \
+        \cf3 var\cf0  stop_times121502 = [\cf4 '2419001'\cf0 , \cf4 '12:22:00'\cf0 , \cf4 '12:22:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '19'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times121502);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              \
+        \cf3 var\cf0  stop_times121555 = [\cf4 '2419000'\cf0 , \cf4 '12:02:00'\cf0 , \cf4 '12:02:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '19'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times121555);\
+        \cf3 var\cf0  stop_times121916 = [\cf4 '2418099'\cf0 , \cf4 '16:02:00'\cf0 , \cf4 '16:02:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '19'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times121916);\
+        \cf3 var\cf0  stop_times121969 = [\cf4 '2418098'\cf0 , \cf4 '15:42:00'\cf0 , \cf4 '15:42:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '19'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times121969);\
+        \cf3 var\cf0  stop_times122036 = [\cf4 '2441268'\cf0 , \cf4 '13:29:00'\cf0 , \cf4 '13:29:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '33'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times122036);\
+        \cf3 var\cf0  stop_times122099 = [\cf4 '2441269'\cf0 , \cf4 '11:29:00'\cf0 , \cf4 '11:29:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '33'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times122099);\
+        \cf3 var\cf0  stop_times122162 = [\cf4 '2441266'\cf0 , \cf4 '7:19:00'\cf0 , \cf4 '7:19:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '33'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times122162);\
+        \cf3 var\cf0  stop_times122225 = [\cf4 '2441267'\cf0 , \cf4 '18:07:00'\cf0 , \cf4 '18:07:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '33'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times122225);\
+        \cf3 var\cf0  stop_times122288 = [\cf4 '2441264'\cf0 , \cf4 '8:32:00'\cf0 , \cf4 '8:32:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '33'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times122288);\
+        \cf3 var\cf0  stop_times122503 = [\cf4 '2440029'\cf0 , \cf4 '20:25:00'\cf0 , \cf4 '20:25:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '33'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times122503);\
+        \cf3 var\cf0  stop_times122681 = [\cf4 '2440023'\cf0 , \cf4 '18:57:00'\cf0 , \cf4 '18:57:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '33'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times122681);\
+        \cf3 var\cf0  stop_times122744 = [\cf4 '2440022'\cf0 , \cf4 '18:42:00'\cf0 , \cf4 '18:42:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '33'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times122744);\
+        \cf3 var\cf0  stop_times122901 = [\cf4 '2440027'\cf0 , \cf4 '19:56:00'\cf0 , \cf4 '19:56:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '33'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times122901);\cf3 var\cf0  stop_times123027 = [\cf4 '2440025'\cf0 , \cf4 '19:27:00'\cf0 , \cf4 '19:27:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '33'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times123027);\
+        \cf3 var\cf0  stop_times123524 = [\cf4 '2418714'\cf0 , \cf4 '21:06:00'\cf0 , \cf4 '21:06:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '40'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times123524);\
+        \cf3 var\cf0  stop_times124833 = [\cf4 '2425202'\cf0 , \cf4 '14:09:00'\cf0 , \cf4 '14:09:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '19'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times124833);\
+        \cf3 var\cf0  stop_times124943 = [\cf4 '2425200'\cf0 , \cf4 '13:43:00'\cf0 , \cf4 '13:43:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '19'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times124943);\
+        \cf3 var\cf0  stop_times126720 = [\cf4 '2441690'\cf0 , \cf4 '23:29:00'\cf0 , \cf4 '23:29:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '19'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times126720);\
+        \cf3 var\cf0  stop_times126996 = [\cf4 '2425748'\cf0 , \cf4 '23:21:00'\cf0 , \cf4 '23:21:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '33'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times126996);\
+\
+\
+        \cf3 var\cf0  stop_times415234 = [\cf4 '2547070'\cf0 , \cf4 '6:39:00'\cf0 , \cf4 '6:39:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '19'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times415234);\
+        \cf3 var\cf0  stop_times415351 = [\cf4 '2547076'\cf0 , \cf4 '22:05:00'\cf0 , \cf4 '22:05:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '33'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times415351);\
+        \cf3 var\cf0  stop_times415677 = [\cf4 '2547079'\cf0 , \cf4 '20:28:00'\cf0 , \cf4 '20:28:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '36'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times415677);\
+        \cf3 var\cf0  stop_times416853 = [\cf4 '2457237'\cf0 , \cf4 '13:12:00'\cf0 , \cf4 '13:12:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '40'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times416853);\
+        \cf3 var\cf0  stop_times417319 = [\cf4 '2457238'\cf0 , \cf4 '13:46:00'\cf0 , \cf4 '13:46:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '40'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times417319);\
+        \cf3 var\cf0  stop_times419881 = [\cf4 '2458819'\cf0 , \cf4 '8:07:00'\cf0 , \cf4 '8:07:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '19'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times419881);\
+\
+        \cf3 var\cf0  stop_times420574 = [\cf4 '2473000'\cf0 , \cf4 '24:29:00'\cf0 , \cf4 '24:29:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '33'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times420574);\
+        \cf3 var\cf0  stop_times422425 = [\cf4 '2545134'\cf0 , \cf4 '7:21:00'\cf0 , \cf4 '7:21:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '36'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times422425);\
+        \cf3 var\cf0  stop_times422585 = [\cf4 '2545136'\cf0 , \cf4 '8:29:00'\cf0 , \cf4 '8:29:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '36'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times422585);\
+        \cf3 var\cf0  stop_times422826 = [\cf4 '2545133'\cf0 , \cf4 '7:05:00'\cf0 , \cf4 '7:05:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '36'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times422826);\
+        \cf3 var\cf0  stop_times422986 = [\cf4 '2545139'\cf0 , \cf4 '9:26:00'\cf0 , \cf4 '9:26:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '36'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times422986);\
+        \cf3 var\cf0  stop_times425338 = [\cf4 '2457393'\cf0 , \cf4 '24:05:00'\cf0 , \cf4 '24:05:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '36'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times425338);\
+        \cf3 var\cf0  stop_times426998 = [\cf4 '2487786'\cf0 , \cf4 '22:46:00'\cf0 , \cf4 '22:46:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '33'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times426998);\
+        \cf3 var\cf0  stop_times428106 = [\cf4 '2486780'\cf0 , \cf4 '20:38:00'\cf0 , \cf4 '20:38:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '33'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times428106);\
+        \cf3 var\cf0  stop_times428169 = [\cf4 '2486781'\cf0 , \cf4 '21:10:00'\cf0 , \cf4 '21:10:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '33'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times428169);\
+        \cf3 var\cf0  stop_times428232 = [\cf4 '2486782'\cf0 , \cf4 '22:13:00'\cf0 , \cf4 '22:13:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '33'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times428232);\
+        \cf3 var\cf0  stop_times430814 = [\cf4 '2456642'\cf0 , \cf4 '14:02:00'\cf0 , \cf4 '14:02:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '19'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times430814);\
+        \cf3 var\cf0  stop_times431297 = [\cf4 '2457259'\cf0 , \cf4 '19:11:00'\cf0 , \cf4 '19:11:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '40'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times431297);\
+        \cf3 var\cf0  stop_times431550 = [\cf4 '2456644'\cf0 , \cf4 '14:42:00'\cf0 , \cf4 '14:42:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '19'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times431550);\
+        \cf3 var\cf0  stop_times431760 = [\cf4 '2459285'\cf0 , \cf4 '15:05:00'\cf0 , \cf4 '15:05:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '36'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times431760);\
+        \cf3 var\cf0  stop_times431948 = [\cf4 '2459286'\cf0 , \cf4 '15:20:00'\cf0 , \cf4 '15:20:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '36'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times431948);\
+        \cf3 var\cf0  stop_times432011 = [\cf4 '2456646'\cf0 , \cf4 '15:22:00'\cf0 , \cf4 '15:22:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '19'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times432011);\
+        \cf3 var\cf0  stop_times432766 = [\cf4 '2487200'\cf0 , \cf4 '7:56:00'\cf0 , \cf4 '7:56:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '36'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times432766);\
+        \cf3 var\cf0  stop_times433196 = [\cf4 '2456647'\cf0 , \cf4 '15:42:00'\cf0 , \cf4 '15:42:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '19'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times433196);\
+        \cf3 var\cf0  stop_times433699 = [\cf4 '2458831'\cf0 , \cf4 '14:42:00'\cf0 , \cf4 '14:42:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '19'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times433699);\
+        \cf3 var\cf0  stop_times433752 = [\cf4 '2458830'\cf0 , \cf4 '14:22:00'\cf0 , \cf4 '14:22:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '19'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times433752);\
+        \cf3 var\cf0  stop_times433805 = [\cf4 '2458833'\cf0 , \cf4 '15:22:00'\cf0 , \cf4 '15:22:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '19'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times433805);\
+        \cf3 var\cf0  stop_times433858 = [\cf4 '2458832'\cf0 , \cf4 '15:02:00'\cf0 , \cf4 '15:02:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '19'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times433858);\
+        \cf3 var\cf0  stop_times433911 = [\cf4 '2458835'\cf0 , \cf4 '16:02:00'\cf0 , \cf4 '16:02:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '19'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times433911);\
+        \cf3 var\cf0  stop_times433964 = [\cf4 '2458834'\cf0 , \cf4 '15:42:00'\cf0 , \cf4 '15:42:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '19'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times433964);\
+        \cf3 var\cf0  stop_times434017 = [\cf4 '2458837'\cf0 , \cf4 '16:52:00'\cf0 , \cf4 '16:52:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '19'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times434017);\
+        \cf3 var\cf0  stop_times434074 = [\cf4 '2458836'\cf0 , \cf4 '16:22:00'\cf0 , \cf4 '16:22:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '19'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times434074);\
+        \cf3 var\cf0  stop_times434127 = [\cf4 '2458839'\cf0 , \cf4 '17:22:00'\cf0 , \cf4 '17:22:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '19'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times434127);\
+        \cf3 var\cf0  stop_times434180 = [\cf4 '2458838'\cf0 , \cf4 '17:02:00'\cf0 , \cf4 '17:02:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '19'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times434180);\
+        \cf3 var\cf0  stop_times434616 = [\cf4 '2486846'\cf0 , \cf4 '14:13:00'\cf0 , \cf4 '14:13:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '40'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times434616);\
+        \cf3 var\cf0  stop_times434679 = [\cf4 '2486845'\cf0 , \cf4 '13:48:00'\cf0 , \cf4 '13:48:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '40'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times434679);\
+        \cf3 var\cf0  stop_times434742 = [\cf4 '2486844'\cf0 , \cf4 '13:25:00'\cf0 , \cf4 '13:25:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '40'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times434742);\
+        \cf3 var\cf0  stop_times434805 = [\cf4 '2486843'\cf0 , \cf4 '12:52:00'\cf0 , \cf4 '12:52:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '40'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times434805);\
+        \cf3 var\cf0  stop_times434742 = [\cf4 '2486844'\cf0 , \cf4 '13:25:00'\cf0 , \cf4 '13:25:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '40'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times434742);\
+        \cf3 var\cf0  stop_times434805 = [\cf4 '2486843'\cf0 , \cf4 '12:52:00'\cf0 , \cf4 '12:52:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '40'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times434805);\
+        \cf3 var\cf0  stop_times434868 = [\cf4 '2486842'\cf0 , \cf4 '12:28:00'\cf0 , \cf4 '12:28:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '40'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times434868);\
+        \cf3 var\cf0  stop_times434931 = [\cf4 '2486841'\cf0 , \cf4 '11:56:00'\cf0 , \cf4 '11:56:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '40'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times434931);\
+        \cf3 var\cf0  stop_times434994 = [\cf4 '2486840'\cf0 , \cf4 '11:34:00'\cf0 , \cf4 '11:34:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '40'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times434994);\
+        \cf3 var\cf0  stop_times436525 = [\cf4 '2547132'\cf0 , \cf4 '11:13:00'\cf0 , \cf4 '11:13:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '13'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        \cf3 var\cf0  stop_times436707 = [\cf4 '2547139'\cf0 , \cf4 '11:33:00'\cf0 , \cf4 '11:33:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '13'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times436707);\
+        \cf3 var\cf0  stop_times436744 = [\cf4 '2547138'\cf0 , \cf4 '10:13:00'\cf0 , \cf4 '10:13:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '13'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times436744);\
+        \cf3 var\cf0  stop_times437436 = [\cf4 '2456648'\cf0 , \cf4 '16:02:00'\cf0 , \cf4 '16:02:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '19'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times437436);\
+        \cf3 var\cf0  stop_times437489 = [\cf4 '2456649'\cf0 , \cf4 '16:22:00'\cf0 , \cf4 '16:22:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '19'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times437489);\
+        \cf3 var\cf0  stop_times437630 = [\cf4 '2471708'\cf0 , \cf4 '13:09:00'\cf0 , \cf4 '13:09:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '33'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times437630);\
+        \cf3 var\cf0  stop_times437693 = [\cf4 '2471709'\cf0 , \cf4 '13:24:00'\cf0 , \cf4 '13:24:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '33'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times437693);\
+        \cf3 var\cf0  stop_times437756 = [\cf4 '2471706'\cf0 , \cf4 '12:39:00'\cf0 , \cf4 '12:39:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '33'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times437756);\
+        \cf3 var\cf0  stop_times437872 = [\cf4 '2471704'\cf0 , \cf4 '12:09:00'\cf0 , \cf4 '12:09:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '33'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times437872);\
+        \cf3 var\cf0  stop_times438041 = [\cf4 '2471703'\cf0 , \cf4 '11:54:00'\cf0 , \cf4 '11:54:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '33'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times438041);\
+        \cf3 var\cf0  stop_times439406 = [\cf4 '2457115'\cf0 , \cf4 '8:23:00'\cf0 , \cf4 '8:23:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '36'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times439406);\
+        \cf3 var\cf0  stop_times439486 = [\cf4 '2457114'\cf0 , \cf4 '8:54:00'\cf0 , \cf4 '8:54:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '36'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times439486);\
+        \cf3 var\cf0  stop_times439566 = [\cf4 '2457113'\cf0 , \cf4 '23:35:00'\cf0 , \cf4 '23:35:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '36'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times439566);\
+        \cf3 var\cf0  stop_times439646 = [\cf4 '2457112'\cf0 , \cf4 '23:05:00'\cf0 , \cf4 '23:05:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '36'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times439646);\
+        \cf3 var\cf0  stop_times442070 = [\cf4 '2459269'\cf0 , \cf4 '9:54:00'\cf0 , \cf4 '9:54:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '36'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times442070);\
+        \cf3 var\cf0  stop_times442150 = [\cf4 '2459268'\cf0 , \cf4 '9:24:00'\cf0 , \cf4 '9:24:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '36'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times442150);\
+        \cf3 var\cf0  stop_times443030 = [\cf4 '2544938'\cf0 , \cf4 '21:45:00'\cf0 , \cf4 '21:45:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '33'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times443030);\
+        \cf3 var\cf0  stop_times443187 = [\cf4 '2544939'\cf0 , \cf4 '22:47:00'\cf0 , \cf4 '22:47:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '33'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times443187);\
+        \cf3 var\cf0  stop_times443250 = [\cf4 '2544936'\cf0 , \cf4 '16:40:00'\cf0 , \cf4 '16:40:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '33'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times443250);\
+        \cf3 var\cf0  stop_times443313 = [\cf4 '2544937'\cf0 , \cf4 '17:00:00'\cf0 , \cf4 '17:00:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '33'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times443313);\
+\
+        \cf3 var\cf0  stop_times447527 = [\cf4 '2459450'\cf0 , \cf4 '21:06:00'\cf0 , \cf4 '21:06:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '40'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times447527);\
+        \cf3 var\cf0  stop_times448491 = [\cf4 '2458859'\cf0 , \cf4 '11:45:00'\cf0 , \cf4 '11:45:00'\cf0 , \cf4 '100033'\cf0 , \cf4 '19'\cf0 , \cf4 '0'\cf0 , \cf4 '0'\cf0 ];\
+        tx.executeSql(\cf4 'INSERT INTO stop_times VALUES (?,?,?,?,?,?,?)'\cf0 , stop_times448491);\
+\
+    \}, \cf3 function\cf0 (e) \{\
+        console.log(\cf5 "ERROR: "\cf0  + e.message);\
+    \});\
+    \
+    console.log(\cf5 "data loaded"\cf0 );\
+    init_loc();\
+\
+\}\
+\
+\cf3 function\cf0  init_loc()\{\
+\
+  \cf2 //  var buttonElement = document.getElementById("loc_button");\cf0 \
+  \cf2 //  buttonElement.id = "loc_button";\cf0 \
+  \cf2 //  var tButton = buttonElement;\cf0 \
+\
+uki(\{\
+  view: \cf5 "Button"\cf0 , text: \cf5 "Find stop"\cf0 ,\
+  rect: \cf5 "20 10 180 24"\cf0 \
+\}).attachTo( document.getElementById(\cf5 "test"\cf0 ) );\
+ \
+uki(\cf5 "Button[text^=Find]"\cf0 ).click(\
+  \cf3 function\cf0 () \{ getLoc(); \}\
+);\
+\
+\cf2 //    tButton.addEventListener("click", getLoc, false);\cf0 \
+\
+\}\
+\
+\cf3 function\cf0  getLoc()\{\
+    \cf2 //   navigator.geolocation.getCurrentPosition(onSuccess, onError);\cf0 \
+    closest_stop();\
+\}\
+\cf2 // onSuccess Geolocation\cf0 \
+\cf2 //\cf0 \
+\cf3 function\cf0  onSuccess(position) \{\
+    document.getElementById(\cf5 "header_find"\cf0 ).innerHTML = \cf5 "Bus Information"\cf0 ;\
+    document.getElementById(\cf5 "info"\cf0 ).style.visibility=\cf5 "hidden"\cf0 \
+    \
+   \cf2 // var element = document.getElementById('geolocation');\cf0 \
+    lat = position.coords.latitude;\
+    lon = position.coords.longitude;\
+\
+    closest_stop();\
+\}\
+\
+\cf2 // onError Callback receives a PositionError object\cf0 \
+\cf2 //\cf0 \
+\cf3 function\cf0  onError(error) \{\
+    navigator.notification.alert(\cf5 "Unable to locate!"\cf0 );\
+    \cf2 //    navigator.notification.alert('code: '    + error.code    + '\\n' + 'message: ' + error.message + '\\n');\cf0 \
+\}\
+\
+\cf3 function\cf0  closest_stop()\{\
+    \cf3 var\cf0  stop = \cf3 new\cf0  Array();\
+    \
+    db.transaction(\cf3 function\cf0 (tx)\{\
+        tx.executeSql(\cf4 'SELECT stop_lat, stop_lon, stop_id FROM stops;'\cf0 , [], \cf3 function\cf0 (tx, result) \{ \
+            \cf3 if\cf0  (result != \cf3 null\cf0  && result.rows != \cf3 null\cf0 ) \{ \
+                \cf3 for\cf0  (\cf3 var\cf0  i = \cf4 0\cf0 ; i < result.rows.length; i++) \{ \
+                    \cf3 var\cf0  row = result.rows.item(i); \
+                    stop[i] = \cf3 new\cf0  Array(row.stop_lat, row.stop_lon, row.stop_id); \
+                \cf2 //  alert("service" + row.monday + "."); \cf0 \
+\
+                \}\
+            \} \cf3 else\cf0 \{\
+                console.log(\cf5 "No busses go here"\cf0 );\
+            \}\
+            \
+            find_closest(stop);\
+\
+        \}, \cf3 function\cf0 (e)\{\
+            console.log(\cf5 "Error: "\cf0  + e.message);\
+        \});\
+        \
+    \});\
+\}\
+\
+\cf3 function\cf0  find_closest(stop)\{\
+    \cf3 var\cf0  R = \cf4 6371\cf0 ; \cf2 // km\cf0 \
+    \cf2 //lat1/long1 = current lat/long\cf0 \
+    \cf2 //lat2/long2 = stop coors\cf0 \
+    \cf3 var\cf0  dLat; \
+    \cf3 var\cf0  dLon; \
+    \cf3 var\cf0  minPos = -\cf4 1\cf0 ;\
+    \cf3 var\cf0  minDistance;\
+\
+    \cf3 var\cf0  count = \cf4 0\cf0 ;\
+    \cf3 for\cf0 (count = \cf4 0\cf0 ; count < stop.length; count++)\{\
+        \cf2 //for each stop coord\cf0 \
+        \cf3 var\cf0  tempLat = stop[count][\cf4 0\cf0 ];\
+        \cf3 var\cf0  tempLon = stop[count][\cf4 1\cf0 ];\
+\
+        dLat = (lat - tempLat);\
+        dLat = dLat*Math.PI/\cf4 180\cf0 ;\
+        dLon = (lon - tempLon);\
+        dLon = dLon*Math.PI/\cf4 180\cf0 ;\
+        \
+        \cf2 // navigator.notification.alert("hello");\cf0 \
+        \
+        \cf3 var\cf0  rlat1 = lat*Math.PI/\cf4 180\cf0 ;\
+        \cf3 var\cf0  rlat2 = stop[count][\cf4 0\cf0 ]*Math.PI/\cf4 180\cf0 ;\
+        \
+        \cf3 var\cf0  a = Math.sin(dLat/\cf4 2\cf0 ) * Math.sin(dLat/\cf4 2\cf0 ) +\
+        Math.sin(dLon/\cf4 2\cf0 ) * Math.sin(dLon/\cf4 2\cf0 ) * Math.cos(rlat1) * Math.cos(rlat2); \
+        \
+        \cf3 var\cf0  c = \cf4 2\cf0  * Math.atan2(Math.sqrt(a), Math.sqrt(\cf4 1\cf0 -a)); \
+        \
+        \cf3 var\cf0  distance = R * c;\
+        \
+        \cf3 if\cf0 (minPos == -\cf4 1\cf0 )\{\
+            minDistance = distance;\
+            minPos = \cf4 0\cf0 ;\
+            \
+        \}\
+        \cf2 //find min diatance\cf0 \
+        \cf3 if\cf0 (distance < minDistance)\{\
+            minPos = count;\
+            minDistance = distance;\
+        \}\
+        \
+    \}\
+    \
+    \cf3 if\cf0 (minPos < \cf4 0\cf0 )\{\
+        minPos = \cf4 0\cf0 ;\
+    \}\
+    \
+    \cf3 if\cf0 (count >= stop.length) \{\
+        find_holidays(stop[minPos][\cf4 2\cf0 ]);\
+    \}\
+\}\
+\
+\cf3 function\cf0  sortMultiDimensional(a,b)\{\
+    \cf2 // this sorts the array using the third element    \cf0 \
+    \cf3 return\cf0  ((a[\cf4 3\cf0 ] < b[\cf4 3\cf0 ]) ? -\cf4 1\cf0  : ((a[\cf4 3\cf0 ] > b[\cf4 3\cf0 ]) ? \cf4 1\cf0  : \cf4 0\cf0 ));\
+\}\
+\cf3 function\cf0  sortMultiDimensionalH(a,b)\{\
+    \cf2 // this sorts the array using the third element    \cf0 \
+    \cf3 return\cf0  ((a[\cf4 2\cf0 ] < b[\cf4 2\cf0 ]) ? -\cf4 1\cf0  : ((a[\cf4 3\cf0 ] > b[\cf4 3\cf0 ]) ? \cf4 1\cf0  : \cf4 0\cf0 ));\
+\}\
+\cf3 function\cf0  find_holidays(bus_stop)\{\
+    db.transaction(\cf3 function\cf0 (tx)\{\
+        \cf2 // select route_short_name, trip_headsign, departure_time,service_id, start_date, end_date  from stop_times NATURAL JOIN calendar NATURAL JOIN trips NATURAL JOIN routes WHERE trip_headsign = "UVic" and stop_id = 101160 and service_id in (select service_id from calendar_dates where exception_type = 1 and date = (SELECT strftime('%Y','NOW') || strftime('%m','now') || strftime('%d','now'))) order by start_date; \cf0 \
+\
+        \cf2 // an array of service id's for current day\cf0 \
+        \cf3 var\cf0  service_id = \cf3 new\cf0  Array();\
+\
+        \cf2 // if holiday, use special service_id\cf0 \
+        tx.executeSql(\cf5 "SELECT service_id FROM calendar_dates WHERE exception_type = 1 AND date = (SELECT strftime('%Y','NOW') || strftime('%m','now') || strftime('%d','now'));"\cf0 , [], \cf3 function\cf0 (tx, result) \{ \
+            \cf3 if\cf0 (result != \cf3 null\cf0  && result.rows != \cf3 null\cf0  && result.rows.length > \cf4 0\cf0  )\{\
+                \cf3 for\cf0  (\cf3 var\cf0  i = \cf4 0\cf0 ; i < result.rows.length; i++) \{ \
+                    service_id[i] = result.rows.item(i).service_id;\
+                \}\
+                find_times(service_id, bus_stop);\
+            \} \cf3 else\cf0  \{\
+                find_date(bus_stop);\
+            \}\
+        \});\
+    \});\
+\}\
+\cf3 function\cf0  find_date(bus_stop)\{\
+    \cf3 var\cf0  service_id = \cf3 new\cf0  Array();\
+    \cf3 var\cf0  date = \cf3 new\cf0  Date();\
+    \cf2 // current day of the week (0-6)\cf0 \
+    \cf2 //      0 = sunday, 1 = monday, .. , 6 = saturday\cf0 \
+    \cf3 var\cf0  day = date.getDay();\
+    \cf3 var\cf0  currDay;\
+    \cf3 switch\cf0  (day)\
+    \{\
+        \cf3 case\cf0  \cf4 0\cf0 :\
+            currDay = \cf4 'sunday'\cf0 ;\
+            \cf3 break\cf0 ;\
+        \cf3 case\cf0  \cf4 1\cf0 :\
+            currDay = \cf4 'monday'\cf0 ;\
+            \cf3 break\cf0 ;\
+        \cf3 case\cf0  \cf4 2\cf0 :\
+            currDay = \cf4 'tuesday'\cf0 ;\
+            \cf3 break\cf0 ;\
+        \cf3 case\cf0  \cf4 3\cf0 :\
+            currDay = \cf4 'wednesday'\cf0 ;\
+            \cf3 break\cf0 ;\
+        \cf3 case\cf0  \cf4 4\cf0 :\
+            currDay = \cf4 'thursday'\cf0 ;\
+            \cf3 break\cf0 ;\
+        \cf3 case\cf0  \cf4 5\cf0 :\
+            currDay = \cf4 'friday'\cf0 ;\
+            \cf3 break\cf0 ;\
+        \cf3 case\cf0  \cf4 6\cf0 :\
+            currDay = \cf4 'saturday'\cf0 ;\
+            \cf3 break\cf0 ;\
+    \}\
+    db.transaction(\cf3 function\cf0 (tx)\{ \
+        tx.executeSql(\cf5 "SELECT service_id FROM calendar WHERE start_date <= (SELECT strftime('%Y','NOW') || strftime('%m','now') || strftime('%d','now')) AND end_date >= (SELECT strftime('%Y','NOW') || strftime('%m','now') || strftime('%d','now')) AND "\cf0  + currDay + \cf5 " = 1;"\cf0 ,[], \cf3 function\cf0 (tx, result)\{\
+         \cf2 // tx.executeSql("SELECT service_id FROM calendar",[], function(tx, result)\{\cf0 \
+  \
+            \cf3 if\cf0 (result != \cf3 null\cf0  && result.rows != \cf3 null\cf0 )\{\
+               \cf2 // var tuple = result.rows.item(0);\cf0 \
+            \cf2 //    console.log("res " + result.rows.length);\cf0 \
+\
+                \cf3 for\cf0  (\cf3 var\cf0  i = \cf4 0\cf0 ; i < result.rows.length; i++) \{ \
+                    service_id[i] = result.rows.item(i).service_id;\
+                 \cf2 //   console.log("service id: " + i + ": " + service_id[i]);\cf0 \
+                \}\
+                find_times(service_id, bus_stop);\
+            \} \cf3 else\cf0  \{\
+                conesole.log(\cf5 "No service_id's for today: -- update data!"\cf0 );\
+                    \
+            \}\
+        \});\
+    \});\
+\}\
+\
+\cf2 /*\
+function find_times(service_id, bus_stop)\{\
+    var data = new Array();\
+    var unsorted_data = new Array();\
+    \
+    db.transaction(function(tx)\{\
+        // select route_short_name, trip_headsign, departure_time,service_id, start_date, end_date  from stop_times NATURAL JOIN calendar NATURAL JOIN trips NATURAL JOIN routes WHERE trip_headsign = "UVic" and stop_id = 101160 and service_id in (select service_id from calendar_dates where exception_type = 1 and date = (SELECT strftime('%Y','NOW') || strftime('%m','now') || strftime('%d','now'))) order by start_date; \
+       tx.executeSql('select route_short_name, route_long_name, trip_headsign, departure_time from stop_times NATURAL JOIN trips NATURAL JOIN routes WHERE stop_id = "' + bus_stop + '";', [], function(tx, result) \{ \
+            var date = new Date();\
+\
+            // current day of the week (0-6)\
+            //      0 = sunday, 1 = monday, .. , 6 = saturday\
+        \
+           /* curr time\
+            if (result != null && result.rows != null) \{ \
+                for (var i = 0; i < result.rows.length; i++) \{ \
+                    \
+                    var tuple = result.rows.item(i);\
+                    var time = new Array();\
+                    time = tuple.departure_time.split(":");\
+                    \
+                    if(date.getHours() > time[0])\{\
+                        continue;\
+                    \} else if (date.getHours() == time[0] && date.getMinutes() > time[1])\{\
+                        continue;\
+                    \}\
+                    \
+                    var time_diff = new Array(2);\
+                    time_diff[0] = time[0] - date.getHours();\
+                    time_diff[1] = time[1] - date.getMinutes();\
+                    \
+                    if(time[1] < date.getMinutes())\{\
+                        time_diff[0] = time_diff[0] - 1;\
+                        time_diff[1] = time_diff[1] + 60;\
+                    \}\
+                    */\cf0 \
+            \cf2 /*\
+            \
+            if (result != null && result.rows != null) \{ \
+\
+          //      for (var i = 0; i < result.rows.length; i++) \{ \
+                  for (var i = 0; i < 5; i++) \{         \
+                    var tuple = result.rows.item(i);\
+                    var time = new Array();\
+                    time = tuple.departure_time.split(":");\
+\
+                    if(11 > time[0])\{\
+                        continue;\
+                    \} else if (11 == time[0] && 30 > time[1])\{\
+                        continue;\
+                    \}\
+                    \
+                    // time_diff[0] = # hours remaining\
+                    // time_diff[0] = # mins remaining\
+                    var time_diff = new Array(2);\
+                    time_diff[0] = time[0] - 11;\
+                    time_diff[1] = time[1] - 30;\
+                    \
+                    if(time[1] < 30)\{\
+                        time_diff[0] = time_diff[0] - 1;\
+                        time_diff[1] = time_diff[1] + 60;\
+                    \}\
+                    unsorted_data[i] = new Array(4);\
+                    unsorted_data[i][0] = tuple.route_short_name;\
+                    unsorted_data[i][1] = tuple.trip_headsign;\
+                    unsorted_data[i][2] = time_diff[0];\
+                    unsorted_data[i][3] = time_diff[1];\
+                \
+                \}\
+                \
+                // Sort lists to display shortest wait time first\
+                unsorted_data.sort(sortMultiDimensional);// sort using our custom function\
+                unsorted_data.sort(sortMultiDimensionalH); \
+\
+                for(var j = 0; j<unsorted_data.length; j++)\{\
+                    // don't display hours if hours_diff = 0\
+\
+                    var str = unsorted_data[j][0] + " "+ unsorted_data[j][1] + ": ";\
+\
+                    if( unsorted_data[j][2] == 0)\{\
+                        data[j] = str.bold() + unsorted_data[j][3] + " minutes";\
+\
+                    \} else \{\
+                        data[j] = str.bold() + unsorted_data[j][2] + " hours " + unsorted_data[j][3] + "minutes";\
+\
+                    \}\
+\
+                \}\
+\
+               // for(j = j;j < 300; j++)\{\
+               //     data[j] = "hello " + j; \
+               // \}\
+   \
+            \} else\{\
+                console.log("No busses go here");\
+            \}\
+\
+     \
+        \}, function(e)\{\
+            console.log("Error: " + e.message);\
+        \});\
+\
+\
+    \});\
+    console.log(data[0]);\
+    display_results(data);\
+\}\
+\
+function display_results(data)\{\
+    \
+   /* uki(\{ view: 'ScrollableList', rect: '1000 900', anchors: 'top left right bottom', handleWidth: 1,\
+            \
+        // with a wrapping box (test background and border)\
+        childViews: \{ view: 'Box', rect: '10 10 180 900002', anchors: 'top left right', background: '#CCC',\
+        // with indierect child list\
+        childViews: \{ view: 'List', rect: '1 1 178 900000', anchors: 'top left right', \
+        data: data, rowHeight: 40, id: 'list', throttle: 0, multiselect: true, textSelectable: false \}\
+        \}\
+        \
+    ).attachTo( document.getElementById('test'), '1000 600' )\
+   */\cf0 \
+   \cf2 /*\
+       var p = uki(\
+        \{ view: 'HSplitPane', rect: '1000 900', anchors: 'top left right bottom', handleWidth: 1,\
+            leftMin: 200, rightMin: 400, handlePosition: 200,\
+            leftChildViews: [ // scrollable list on the left\
+                \{ view: 'ScrollPane', rect: '200 600', anchors: 'top left right bottom',\
+                    // with a wrapping box (test background and border)\
+                    childViews: \{ view: 'Box', rect: '10 10 180 900002', anchors: 'top left right', background: '#CCC',\
+                        // with indierect child list\
+                        childViews: \{ view: 'List', rect: '1 1 178 900000', anchors: 'top left right', \
+                            data: data, rowHeight: 40, id: 'list', throttle: 0, multiselect: true, textSelectable: false \}\
+                    \}\
+                \}\
+            ]\
+        \}\
+    ).attachTo( document.getElementById('test'), '1000 600' )\
+\
+\}\
+*/\cf0 \
+\cf3 function\cf0  find_times(service_id, bus_stop)\{\
+    \cf3 var\cf0  data = \cf3 new\cf0  Array();\
+    \cf3 var\cf0  unsorted_data = \cf3 new\cf0  Array();\
+    \
+    db.transaction(\cf3 function\cf0 (tx)\{\
+        \cf2 // select route_short_name, trip_headsign, departure_time,service_id, start_date, end_date  from stop_times NATURAL JOIN calendar NATURAL JOIN trips NATURAL JOIN routes WHERE trip_headsign = "UVic" and stop_id = 101160 and service_id in (select service_id from calendar_dates where exception_type = 1 and date = (SELECT strftime('%Y','NOW') || strftime('%m','now') || strftime('%d','now'))) order by start_date; \cf0 \
+        tx.executeSql(\cf4 'select route_short_name, route_long_name, trip_headsign, departure_time from stop_times NATURAL JOIN trips NATURAL JOIN routes WHERE stop_id = "'\cf0  + bus_stop + \cf4 '";'\cf0 , [], \cf3 function\cf0 (tx, result) \{ \
+            \cf3 var\cf0  date = \cf3 new\cf0  Date();\
+            \cf2 // current day of the week (0-6)\cf0 \
+            \cf2 //      0 = sunday, 1 = monday, .. , 6 = saturday\cf0 \
+            \
+            \cf3 if\cf0  (result != \cf3 null\cf0  && result.rows != \cf3 null\cf0 ) \{ \
+                \cf3 for\cf0  (\cf3 var\cf0  i = \cf4 0\cf0 ; i < result.rows.length; i++) \{ \
+                    \
+                    \cf3 var\cf0  tuple = result.rows.item(i);\
+                    \cf3 var\cf0  time = \cf3 new\cf0  Array();\
+                    time = tuple.departure_time.split(\cf5 ":"\cf0 );\
+                    \
+                    \cf3 if\cf0 (date.getHours() > time[\cf4 0\cf0 ])\{\
+                        \cf3 continue\cf0 ;\
+                    \} \cf3 else\cf0  \cf3 if\cf0  (date.getHours() == time[\cf4 0\cf0 ] && date.getMinutes() > time[\cf4 1\cf0 ])\{\
+                        \cf3 continue\cf0 ;\
+                    \}\
+                    \
+                    \cf3 var\cf0  time_diff = \cf3 new\cf0  Array(\cf4 2\cf0 );\
+                    time_diff[\cf4 0\cf0 ] = time[\cf4 0\cf0 ] - date.getHours();\
+                    time_diff[\cf4 1\cf0 ] = time[\cf4 1\cf0 ] - date.getMinutes();\
+                    \
+                    \cf3 if\cf0 (time[\cf4 1\cf0 ] < date.getMinutes())\{\
+                        time_diff[\cf4 0\cf0 ] = time_diff[\cf4 0\cf0 ] - \cf4 1\cf0 ;\
+                        time_diff[\cf4 1\cf0 ] = time_diff[\cf4 1\cf0 ] + \cf4 60\cf0 ;\
+                    \}\
+                    unsorted_data[i] = \cf3 new\cf0  Array(\cf4 4\cf0 );\
+                    unsorted_data[i][\cf4 0\cf0 ] = tuple.route_short_name;\
+                    unsorted_data[i][\cf4 1\cf0 ] = tuple.trip_headsign;\
+                    unsorted_data[i][\cf4 2\cf0 ] = time_diff[\cf4 0\cf0 ];\
+                    unsorted_data[i][\cf4 3\cf0 ] = time_diff[\cf4 1\cf0 ];\
+                \
+                \}\
+                \
+                \cf2 // Sort lists to display shortest wait time first\cf0 \
+                unsorted_data.sort(sortMultiDimensional);\cf2 // sort using our custom function\cf0 \
+                unsorted_data.sort(sortMultiDimensionalH); \
+               \
+                \cf3 for\cf0 (\cf3 var\cf0  j = \cf4 0\cf0 ; j<unsorted_data.length; j++)\{\
+                    \cf2 // don't display hours if hours_diff = 0\cf0 \
+                    \cf3 if\cf0 ( unsorted_data[j][\cf4 2\cf0 ] == \cf4 0\cf0 )\{\
+                        data[j] = unsorted_data[j][\cf4 0\cf0 ] + \cf5 " "\cf0 + unsorted_data[j][\cf4 1\cf0 ] + \cf5 ": "\cf0  + unsorted_data[j][\cf4 3\cf0 ] + \cf5 " minutes remaining"\cf0 ;\
+                    \} \cf3 else\cf0  \{\
+                        data[j] = unsorted_data[j][\cf4 0\cf0 ] + \cf5 " "\cf0 + unsorted_data[j][\cf4 1\cf0 ] + \cf5 ": "\cf0  + unsorted_data[j][\cf4 2\cf0 ] + \cf5 " hours "\cf0  + unsorted_data[j][\cf4 3\cf0 ] + \cf5 " minutes remaining"\cf0 ;\
+                    \}\
+                    \
+                \}\
+                \
+                \cf3 for\cf0 (j = j;j < \cf4 300\cf0 ; j++)\{\
+                    data[j] = \cf5 "hello "\cf0  + j; \
+                    \
+                \}\
+                \
+            \} \cf3 else\cf0 \{\
+                console.log(\cf5 "No busses go here"\cf0 );\
+            \}\
+        \}, \cf3 function\cf0 (e)\{\
+            console.log(\cf5 "Error: "\cf0  + e.message);\
+        \});\
+\
+    \});\
+    display_results(data);\
+\}\
+\
+\cf3 function\cf0  display_results(data)\{\
+    \cf3 var\cf0  p = uki(\
+        \{ view: \cf4 'HSplitPane'\cf0 , rect: \cf4 '1000 600'\cf0 , anchors: \cf4 'top left right bottom'\cf0 , handleWidth: \cf4 1\cf0 ,\
+            leftMin: \cf4 200\cf0 , rightMin: \cf4 400\cf0 , handlePosition: \cf4 200\cf0 ,\
+            leftChildViews: [ \cf2 // scrollable list on the left\cf0 \
+                \{ view: \cf4 'ScrollPane'\cf0 , rect: \cf4 '200 600'\cf0 , anchors: \cf4 'top left right bottom'\cf0 ,\
+                    \cf2 // with a wrapping box (test background and border)\cf0 \
+                    childViews: \{ view: \cf4 'Box'\cf0 , rect: \cf4 '10 10 180 900002'\cf0 , anchors: \cf4 'top left right'\cf0 , background: \cf4 '#CCC'\cf0 ,\
+                        \cf2 // with indierect child list\cf0 \
+                        childViews: \{ view: \cf4 'List'\cf0 , rect: \cf4 '1 1 178 900000'\cf0 , anchors: \cf4 'top left right'\cf0 , \
+                            data: data, rowHeight: \cf4 40\cf0 , id: \cf4 'list'\cf0 , throttle: \cf4 0\cf0 , multiselect: \cf3 true\cf0 , textSelectable: \cf3 false\cf0  \}\
+                    \}\
+                \}\
+            ]\
+        \}\
+    ).attachTo( document.getElementById(\cf4 'test'\cf0 ), \cf4 '1000 600'\cf0  )\
+\
+\
+\
+\}}

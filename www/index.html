@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Transit</title>
+        <link rel="stylesheet" href="css/style.css" />
+        <meta charset="utf-8">
+   
+        <script type="text/javascript" charset="utf-8" src="cordova-1.7.0.js"></script>
+        <script type="text/javascript" charset="utf-8" src="js/main.js"></script>
+        <script type="text/javascript" charset="utf-8" src="js/SQLitePlugin.js"></script>
+        <script type="text/javascript" charset="utf-8" src="js/uki.js"></script>
+        <script type="text/javascript" charset="utf-8" src="js/pixFileDownload.js"></script>
+        <script type="text/javascript" charset="utf-8" src="js/ZipFile.js"></script>
+      <!--  <script type="text/javascript" charset="utf-8" src="js/data.js"></script>
+      -->
+        <script type="text/javascript" charset="utf-8">
+            // Wait for PhoneGap to load
+            document.addEventListener("deviceready", onDeviceReady, false);
+
+        </script>
+            
+    </head>
+
+    <body>  
+        <header> ABLE Transit </header>
+
+
+        <div id = "main" style="display:block">
+            <p id="info"> Click for bus schedule information:
+            </p>  
+            <button id="loc_button" type="html">Schedule info</button> 
+        </div>
+        <div id="sched" style="display:none">
+            <p id="stop_info"> Schedule information for stop 
+                <span id="stop_name"> </span>
+            </p>  
+            <button id="refresh" type="html">Refresh</button> 
+            <button id="change_stop" type="html">Change Stop</button> 
+
+            <div id='test' style='width: 100%; height: 400px;'></div>
+
+        </div>        
+        
+        <div id="select_stop" style="display:none">
+            <p id="select_info"> Select the stop you would like 
+            </p>  
+            <button id="refresh_stop" type="html">Refresh</button> 
+            <button id="app_info" type="html">App Info</button> 
+
+            <div id='stops' style='width: 100%; height: 400px;'></div>
+
+        </div>  
+    </body> 
+            
+</html>
